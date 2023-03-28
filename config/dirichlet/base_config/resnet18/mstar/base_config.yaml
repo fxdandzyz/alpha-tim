@@ -2,6 +2,7 @@ TRAINER:
     print_freq: 10
     alpha: -1.0
     label_smoothing: 0.
+    transform: None
 
 MODEL:
     arch: 'resnet18' # ('resnet18', 'wideres')
@@ -19,7 +20,7 @@ OPTIM:
 
 DATA:
     dataset: 'mstar'
-    dataset_path: 'data/mstar/mstar_train'
+    dataset_path: 'data/mstar'
     batch_size_loader: 256
     enlarge: True
     num_workers: 4

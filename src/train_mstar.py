@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import parser
+import argparse
 import torch.backends.cudnn as cudnn
 from functools import reduce
 from visdom_logger import VisdomLogger
@@ -157,8 +158,21 @@ class Trainer:
             batch_acc.append(torch.sum(target.reshape(-1)==output.reshape(-1)).div(self.args.batch_size))
         acc=reduce(lambda x,y:x+y,batch_acc)
         return acc
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description='Main')
+    parser.add_argument('--base_config', default='config/dirichlet/base_config/resnet18/mini/base_config.yaml',type=str, required=True, help='Base config file')
+    parser.add_argument('--method_config', default='config/dirichlet/methods_config/alpha_tim.yaml',type=str, required=True, help='Method config file')
+    parser.add_argument('--opts', default=None, nargs=argparse.REMAINDER)
+    args = parser.parse_args()
+    assert args.base_config is not None
+    cfg = load_cfg_from_cfg_file(args.base_config)
+    cfg.update(load_cfg_from_cfg_file(args.method_config))
+    if args.opts is not None:
+        cfg = merge_cfg_from_list(cfg, args.opts)
+    return cfg
 def main():
-    args=parser.args()
+    args = parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
     callback = None if args.visdom_port is None else VisdomLogger(port=args.visdom_port)
     if args.seed is not None:

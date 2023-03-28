@@ -202,10 +202,7 @@ def get_training_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True)
 
     return mstar_training_loader
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
+
 def get_val_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True):
     """ return training dataloader
     Args:
@@ -233,8 +230,7 @@ def get_val_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True):
         mstar_training, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
 
     return mstar_training_loader
->>>>>>> b0f4795 (second commit)
->>>>>>> b953d52 (second commit)
+
 def tensor_to_img(x, mean, std, imtype=numpy.uint8):
     """"将tensor的数据类型转成numpy类型，并反归一化.
 
