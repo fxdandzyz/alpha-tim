@@ -1,0 +1,47 @@
+TRAINER:
+    print_freq: 10
+    alpha: -1.0
+    label_smoothing: 0.
+
+MODEL:
+    arch: 'resnet18' # ('resnet18', 'wideres')
+    num_classes: 7
+
+OPTIM:
+    epochs: 90
+    gamma: 0.1
+    lr: 0.1
+    lr_stepsize: 30
+    nesterov: False
+    weight_decay: 0.0001
+    optimizer_name: 'SGD'
+    scheduler: 'multi_step'
+
+DATA:
+    dataset: 'mstar'
+    dataset_path: 'data/mstar/mstar_train'
+    batch_size_loader: 256
+    enlarge: True
+    num_workers: 4
+    path: 'data'
+
+EVAL:
+    evaluate: True      # Set to True to evaluate methods
+    number_tasks: 1000 # Number of tasks to evaluate
+    batch_size: 64
+    n_ways: 5
+    n_query: 15 # Balanced case: 15 query data per class
+    balanced: 'dirichlet' # ('balanced' | 'dirichlet')
+    alpha_dirichlet: 2
+    model_tag: 'best'
+    plt_metrics: ['accs']
+    shots: [1,5]
+    used_set: 'test'
+    fresh_start: False
+
+DISTRIBUTED:
+    cuda: True
+    visdom_port:
+    seed: 2020
+    ckpt_path: 'checkpoints/mstar/softmax/resnet18' # path model checkpoint
+    log_path: 'logs' # path to where log files will be saved 

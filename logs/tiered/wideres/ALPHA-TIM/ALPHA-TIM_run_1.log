@@ -1,0 +1,5 @@
+[__main__]: [INFO]: => Creating model 'wideres'
+[__main__]: [INFO]: Number of model parameters: 36707871
+[src.eval]: [INFO]: => Runnning full evaluation with method: ALPHA-TIM
+[src.eval]: [INFO]:  ==> Beginning feature extraction to compute training mean
+[src.eval]: [INFO]:  ==> Saving features to checkpoints/tiered/softmax/wideres/wideres/best/test/output_mean.plk
