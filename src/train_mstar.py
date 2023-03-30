@@ -20,11 +20,11 @@ class Trainer:
     def __init__(self,device,args):
         self.device=device
         self.args=args
-        self.train_dataset=MstarTrain(args.dataset_path,transform=args.transform)
+        self.train_dataset=torchvision.datasets.ImageFolder(args.train_folder)
         self.train_mean,self.train_std=compute_mean_std(self.train_dataset)
         self.train_loader=get_training_dataloader(mean=self.train_mean,std=self.train_std,batch_size=args.batch_size,
                                                   num_workers=args.num_workers,shuffle=True)
-        self.val_dataset=MstarTrain(args.dataset_path,transform=args.transform)
+        self.val_dataset=torchvision.datasets.ImageFolder(args.val_folder)
         self.val_mean,self.val_std=compute_mean_std(self.val_dataset)
         self.val_loader=get_val_dataloader(mean=self.val_mean,std=self.val_std,batch_size=args.batch_size,
                                                   num_workers=args.num_workers,shuffle=True)
