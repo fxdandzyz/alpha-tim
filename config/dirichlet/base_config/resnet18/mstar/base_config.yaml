@@ -21,6 +21,8 @@ OPTIM:
 DATA:
     dataset: 'mstar'
     dataset_path: 'data/mstar'
+    train_folder: 'data/mstar/train'
+    val_folder: 'data/mstar/val'
     batch_size_loader: 256
     enlarge: True
     num_workers: 4

@@ -7,6 +7,7 @@ import numpy as np
 import parser
 import argparse
 import torch.backends.cudnn as cudnn
+import torchvision
 from functools import reduce
 from visdom_logger import VisdomLogger
 from src.utils import warp_tqdm, save_checkpoint, load_cfg_from_cfg_file, merge_cfg_from_list, Logger, get_log_file
