@@ -127,7 +127,8 @@ class Trainer:
             tqdm_test_loader = warp_tqdm(self.val_loader, disable_tqdm)
             for i, (inputs, target, _) in enumerate(tqdm_test_loader):
                 inputs, target = inputs.to(self.device), target.to(self.device, non_blocking=True)
-                output = model(inputs, feature=True)[0].cuda(0)
+                #output = model(inputs, feature=True)[0].cuda(0)
+                output = model(inputs, feature=True)[0]
                 train_out = output[:self.args.meta_val_way * self.args.meta_val_shot]
                 train_label = target[:self.args.meta_val_way * self.args.meta_val_shot]
                 test_out = output[self.args.meta_val_way * self.args.meta_val_shot:]

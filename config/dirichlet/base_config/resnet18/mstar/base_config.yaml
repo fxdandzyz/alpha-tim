@@ -31,7 +31,7 @@ DATA:
 EVAL:
     evaluate: True      # Set to True to evaluate methods
     number_tasks: 1000 # Number of tasks to evaluate
-    batch_size: 64
+    batch_size: 32
     n_ways: 5
     n_query: 15 # Balanced case: 15 query data per class
     balanced: 'dirichlet' # ('balanced' | 'dirichlet')
