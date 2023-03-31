@@ -195,7 +195,7 @@ def get_training_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True)
         transforms.Normalize(mean, std)
     ])
     #cifar100_training = CIFAR100Train(path, transform=transform_train)
-    mstar_training = torchvision.datasets.ImageFolder("./data/train", transform=transform_train)
+    mstar_training = torchvision.datasets.ImageFolder("./data/mstar/train", transform=transform_train)
     #mstar_training = torchvision.datasets(root='./data/train', train=True, download=True, transform=transform_train)
     mstar_training_loader = DataLoader(
         mstar_training, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
@@ -224,7 +224,7 @@ def get_val_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True):
         transforms.Normalize(mean, std)
     ])
     #cifar100_training = CIFAR100Train(path, transform=transform_train)
-    mstar_training = torchvision.datasets.ImageFolder("./data/val", transform=transform_train)
+    mstar_training = torchvision.datasets.ImageFolder("./data/mstar/val", transform=transform_train)
     #mstar_training = torchvision.datasets(root='./data/train', train=True, download=True, transform=transform_train)
     mstar_training_loader = DataLoader(
         mstar_training, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
@@ -293,11 +293,16 @@ def compute_mean_std(mstar_dataset):
         a tuple contains mean, std value of entire dataset
     """
 
-    data_r = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[0] for i in range(len(mstar_dataset))])
-    data_g = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[1] for i in range(len(mstar_dataset))])
-    data_b = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[2] for i in range(len(mstar_dataset))])
+    data_r = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[0].mean() for i in range(len(mstar_dataset))])
+    data_g = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[1].mean() for i in range(len(mstar_dataset))])
+    data_b = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[2].mean() for i in range(len(mstar_dataset))])
+    
+    std_r = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[0].std() for i in range(len(mstar_dataset))])
+    std_g = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[1].std() for i in range(len(mstar_dataset))])
+    std_b = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[2].std() for i in range(len(mstar_dataset))])
+    
     mean = numpy.mean(data_r)/255, numpy.mean(data_g)/255, numpy.mean(data_b)/255
-    std = numpy.std(data_r)/255, numpy.std(data_g)/255, numpy.std(data_b)/255
+    std = numpy.std(std_r)/255, numpy.std(std_g)/255, numpy.std(std_b)/255
 
     return mean, std
 

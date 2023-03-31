@@ -16,17 +16,19 @@ from src.utils_mstar import get_training_dataloader,get_val_dataloader,get_test_
 from src.mstar import MstarTrain,MstarTest
 from src.models.ingredient import get_model
 from src.optim import get_optimizer, get_scheduler
-
+mstar={}
+mstar['train_mean']=[0.2312,0.2689,0.2351]
+mstar['train_std']=[0.0669,0.0451,0.0643]
+mstar['val_mean']=[0.2221,0.2614,0.2286]
+mstar['val_std']=[0.0657,0.0445,0.0635]
 class Trainer:
     def __init__(self,device,args):
         self.device=device
         self.args=args
-        self.train_dataset=torchvision.datasets.ImageFolder(args.train_folder)
-        self.train_mean,self.train_std=compute_mean_std(self.train_dataset)
+        self.train_mean,self.train_std=mstar['train_mean'],mstar['train_std']
         self.train_loader=get_training_dataloader(mean=self.train_mean,std=self.train_std,batch_size=args.batch_size,
                                                   num_workers=args.num_workers,shuffle=True)
-        self.val_dataset=torchvision.datasets.ImageFolder(args.val_folder)
-        self.val_mean,self.val_std=compute_mean_std(self.val_dataset)
+        self.val_mean,self.val_std=mstar['val_mean'],mstar['val_std']
         self.val_loader=get_val_dataloader(mean=self.val_mean,std=self.val_std,batch_size=args.batch_size,
                                                   num_workers=args.num_workers,shuffle=True)
         self.num_classes=args.num_classes
@@ -57,7 +59,7 @@ class Trainer:
         steps_per_epoch = len(self.train_loader)
         end = time.time()
         tqdm_train_loader = warp_tqdm(self.train_loader, disable_tqdm)
-        for i, (input, target, _) in enumerate(tqdm_train_loader):
+        for i,(input,target) in enumerate(tqdm_train_loader):
 
             input, target = input.to(self.device), target.to(self.device, non_blocking=True)
 
@@ -76,8 +78,8 @@ class Trainer:
                 loss = self.cross_entropy(output, target_a) * lam + self.cross_entropy(output, target_b) * (1. - lam)
             else:
                 output = model(input)
-                log_pred=F.log_softmax(output,dim=-1)
-                loss = self.ce_loss(log_pred, smoothed_targets)
+                loss = self.cross_entropy(output, smoothed_targets)
+                
 
             # Backward pass
             optimizer.zero_grad()
