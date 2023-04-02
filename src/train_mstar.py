@@ -12,7 +12,7 @@ from functools import reduce
 from visdom_logger import VisdomLogger
 from src.utils import warp_tqdm, save_checkpoint, load_cfg_from_cfg_file, merge_cfg_from_list, Logger, get_log_file
 from src.utils import warp_tqdm, get_metric, AverageMeter,save_checkpoint
-from src.utils_mstar import get_training_dataloader,get_val_dataloader,get_test_dataloader,compute_mean_std
+from src.utils_mstar import get_training_dataloader,get_val_dataloader,get_test_dataloader,compute_mean_std,get_network
 from src.mstar import MstarTrain,MstarTest
 from src.models.ingredient import get_model
 from src.optim import get_optimizer, get_scheduler
@@ -32,22 +32,10 @@ class Trainer:
         self.val_loader=get_val_dataloader(mean=self.val_mean,std=self.val_std,batch_size=args.batch_size,
                                                   num_workers=args.num_workers,shuffle=True)
         self.num_classes=args.num_classes
-    def ce_loss(self,log_pred, targets, use_hard_labels=True, reduction='none'):
-        """
-        wrapper for cross entropy loss in pytorch.
-    
-        Args
-        logits: logit values, shape=[Batch size, # of classes]
-        targets: integer or vector, shape=[Batch size] or [Batch size, # of classes]
-        use_hard_labels: If True, targets have [Batch size] shape with int values. If False, the target is vector (default True)
-        """
-        if use_hard_labels:
-            return F.nll_loss(log_pred, targets, reduction=reduction)
-            # return F.cross_entropy(logits, targets, reduction=reduction) this is unstable
-        else:
-            assert log_pred.shape == targets.shape
-            nll_loss = torch.sum(-targets * log_pred, dim=1)
-            return nll_loss
+    def cross_entropy(self, logits, one_hot_targets, reduction='batchmean'):
+        logsoftmax_fn = nn.LogSoftmax(dim=1)
+        logsoftmax = logsoftmax_fn(logits)
+        return - (one_hot_targets * logsoftmax).sum(1).mean()
     def do_epoch(self, epoch, scheduler, print_freq, disable_tqdm, callback, model,
                  alpha, optimizer):
         batch_time = AverageMeter()
@@ -191,7 +179,7 @@ def main():
 
     # create model
     logger.info("=> Creating model '{}'".format(args.arch))
-    model = torch.nn.DataParallel(get_model(args)).cuda()
+    model = torch.nn.DataParallel(get_network(args).cuda())
     logger.info('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
     optimizer = get_optimizer(args=args, model=model)
     

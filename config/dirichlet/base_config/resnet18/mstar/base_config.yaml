@@ -5,7 +5,7 @@ TRAINER:
     transform: None
 
 MODEL:
-    arch: 'resnet18' # ('resnet18', 'wideres')
+    arch: 'resnet12' # ('resnet18', 'wideres')
     num_classes: 7
 
 OPTIM:
