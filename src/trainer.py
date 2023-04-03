@@ -4,21 +4,23 @@ import torch.nn as nn
 import numpy as np
 from src.utils import warp_tqdm, get_metric, AverageMeter
 from src.datasets import CategoriesSampler, get_dataset, get_dataloader
-
+from src.utils_mstar import get_training_dataloader,get_val_dataloader,get_test_dataloader,compute_mean_std,get_network
+mstar={}
+mstar['train_mean']=[0.2312,0.2689,0.2351]
+mstar['train_std']=[0.0669,0.0451,0.0643]
+mstar['val_mean']=[0.2221,0.2614,0.2286]
+mstar['val_std']=[0.0657,0.0445,0.0635]
 class Trainer:
     def __init__(self, device, args):
-        self.device = device
-        self.args = args
-        train_set = get_dataset(split='train', args=self.args, aug=True, out_name=False)
-        self.train_loader = get_dataloader(sets=train_set, args=self.args, shuffle=True)
-        val_set = get_dataset(split='val', args=self.args, aug=False, out_name=False)
-        sampler_val = CategoriesSampler(val_set.labels, self.args.meta_val_iter,
-                                        self.args.meta_val_way, self.args.meta_val_shot, self.args.meta_val_query,
-                                                  'balanced', self.args.alpha_dirichlet)
-        self.val_loader = get_dataloader(sets=val_set, args=self.args, sampler=sampler_val, shuffle=True)
-        self.device = device
-        self.num_classes = self.args.num_classes
-
+        self.device=device
+        self.args=args
+        self.train_mean,self.train_std=mstar['train_mean'],mstar['train_std']
+        self.train_loader=get_training_dataloader(mean=self.train_mean,std=self.train_std,batch_size=args.batch_size,
+                                                  num_workers=args.num_workers,shuffle=True)
+        self.val_mean,self.val_std=mstar['val_mean'],mstar['val_std']
+        self.val_loader=get_val_dataloader(mean=self.val_mean,std=self.val_std,batch_size=args.batch_size,
+                                                  num_workers=args.num_workers,shuffle=True)
+        self.num_classes=args.num_classes
     def cross_entropy(self, logits, one_hot_targets, reduction='batchmean'):
         logsoftmax_fn = nn.LogSoftmax(dim=1)
         logsoftmax = logsoftmax_fn(logits)
@@ -35,7 +37,7 @@ class Trainer:
         steps_per_epoch = len(self.train_loader)
         end = time.time()
         tqdm_train_loader = warp_tqdm(self.train_loader, disable_tqdm)
-        for i, (input, target, _) in enumerate(tqdm_train_loader):
+        for i, (input, target) in enumerate(tqdm_train_loader):
 
             input, target = input.to(self.device), target.to(self.device, non_blocking=True)
 

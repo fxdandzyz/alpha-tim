@@ -57,7 +57,7 @@ class Bottleneck(nn.Module):
         return out
 
 class ResNet(nn.Module):
-    def __init__(self, block, keep_prob=1.0, avg_pool=True, drop_rate=0.0, dropblock_size=5):
+    def __init__(self, block, keep_prob=1.0, avg_pool=True, drop_rate=0.0, dropblock_size=5,num_classes=7):
         self.inplanes = 3
         super(ResNet, self).__init__()
         self.layer1 = self._make_layer(block, 64, stride=2, drop_rate=drop_rate)
@@ -68,7 +68,7 @@ class ResNet(nn.Module):
         self.keep_avg_pool = avg_pool
         self.dropout = nn.Dropout(p=1 - self.keep_prob, inplace=False)
         self.drop_rate = drop_rate
-
+        self.fc=nn.Linear(640, num_classes)
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
@@ -95,6 +95,7 @@ class ResNet(nn.Module):
         if self.keep_avg_pool:
             x = F.avg_pool2d(x, kernel_size=(2, 2), padding=1)
         x = x.view(x.size(0), -1)
+        x=self.fc(x)
         return x
 
 def Resnet12(keep_prob=1.0, avg_pool=True, **kwargs):

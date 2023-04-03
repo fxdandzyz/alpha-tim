@@ -9,6 +9,7 @@ from visdom_logger import VisdomLogger
 import sys
 sys.path.append("/root/miniconda3/Realistic_Transductive_Few_Shot-master/")
 from src.utils import warp_tqdm, save_checkpoint, load_cfg_from_cfg_file, merge_cfg_from_list, Logger, get_log_file
+from src.utils_mstar import get_training_dataloader,get_val_dataloader,get_test_dataloader,compute_mean_std,get_network
 from src.trainer import Trainer
 from src.eval import Evaluator
 from src.optim import get_optimizer, get_scheduler
@@ -44,7 +45,7 @@ def main():
 
     # create model
     logger.info("=> Creating model '{}'".format(args.arch))
-    model = torch.nn.DataParallel(get_model(args)).cuda()
+    model = torch.nn.DataParallel(get_network(args).cuda()).cuda()
 
     logger.info('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
     optimizer = get_optimizer(args=args, model=model)

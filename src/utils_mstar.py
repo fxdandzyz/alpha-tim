@@ -71,7 +71,7 @@ def get_network(args):
         net = xception()
     #新加实验用的resnet12
     elif args.arch == 'resnet12':
-        net = ResNet12.Resnet12()
+        net = ResNet12.Resnet12(num_classes=args.num_classes)
     elif args.arch == 'resnet18':
         from models.resnet import resnet18
         net = resnet18()
@@ -212,8 +212,8 @@ def get_val_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True):
     """
     transform_train = transforms.Compose([
         #transforms.ToPILImage(),
-        transforms.Resize ((448, 448)),
-        transforms.RandomCrop(448),
+        transforms.Resize ((224, 224)),
+        transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
         # transforms.RandomRotation(15),
         transforms.ToTensor(),
