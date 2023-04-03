@@ -102,9 +102,13 @@ class Trainer:
 
         with torch.no_grad():
             tqdm_test_loader = warp_tqdm(self.val_loader, disable_tqdm)
+            val_acc=torch.zeros(len(self.val_loader))
             for i, (inputs, target) in enumerate(tqdm_test_loader):
                 inputs, target = inputs.to(self.device), target.to(self.device, non_blocking=True)
-                output = model(inputs, feature=True)[0].cuda(0)
+                output = model(inputs)
+                output = torch.max(torch.softmax(output,dim=-1),dim=-1)[1]
+                val_acc[i]=torch.div(torch.sum(output==target),target.shape[0])
+        '''
                 train_out = output[:self.args.meta_val_way * self.args.meta_val_shot]
                 train_label = target[:self.args.meta_val_way * self.args.meta_val_shot]
                 test_out = output[self.args.meta_val_way * self.args.meta_val_shot:]
@@ -120,7 +124,9 @@ class Trainer:
         if callback is not None:
             callback.scalar('val_acc', epoch + 1, top1.avg, title='Val acc')
         return top1.avg
-
+        '''
+        acc=val_acc.mean()
+        return acc
     def metric_prediction(self, support, query, train_label):
         support = support.view(support.shape[0], -1)
         query = query.view(query.shape[0], -1)

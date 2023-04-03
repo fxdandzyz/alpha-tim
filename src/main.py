@@ -125,7 +125,7 @@ def main():
 
     # Final evaluation on test set
     logger.info("=> Creating model '{}'".format(args.arch))
-    model = torch.nn.DataParallel(get_model(args)).cuda()
+    model = torch.nn.DataParallel(get_network(args)).cuda()
 
     logger.info('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
