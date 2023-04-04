@@ -71,7 +71,7 @@ def get_network(args):
         net = xception()
     #新加实验用的resnet12
     elif args.arch == 'resnet12':
-        net = ResNet12.Resnet12(num_classes=args.num_classes,use_classifier=False)
+        net = ResNet12.Resnet12(num_classes=args.num_classes,use_classifier=True)
     elif args.arch == 'resnet18':
         from models.resnet import resnet18
         net = resnet18()
@@ -255,7 +255,7 @@ def tensor_to_img(x, mean, std, imtype=numpy.uint8):
         image_numpy = x
     return image_numpy.astype(imtype)
 
-def get_test_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True):
+def get_test_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True,sampler=None,pin_memory=False):
     """ return training dataloader
     Args:
         mean: mean of cifar100 test dataset
@@ -274,9 +274,12 @@ def get_test_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True):
     ])
     #cifar100_test = CIFAR100Test(path, transform=transform_test)
     mstar_test = torchvision.datasets.ImageFolder("./data/mstar/test", transform=transform_test)
-    mstar_test_loader = DataLoader(
-        mstar_test, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
-
+    if sampler is None:
+        mstar_test_loader = DataLoader(
+            mstar_test, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
+    else:
+        mstar_test_loaer = DataLoader(
+            mstar_test,batch_sampler=sampler,num_workers=num_workers,pin_memory=pin_memory)
     return mstar_test_loader
 
 def compute_mean_std(mstar_dataset):

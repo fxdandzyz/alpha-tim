@@ -10,7 +10,13 @@ from src.methods.protonet import ProtoNet
 from src.methods.entropy_min import Entropy_min
 from src.datasets import Tasks_Generator, CategoriesSampler, get_dataset, get_dataloader
 from torchvision.datasets import ImageFolder
-from src.utils_mstar import get_test_dataloader,compute_mean_std,extract_mstar_features
+from src.utils_mstar import get_test_dataloader,get_training_dataloader,compute_mean_std,extract_mstar_features
+
+mstar={}
+mstar['train_mean']=[0.2312,0.2689,0.2351]
+mstar['train_std']=[0.0669,0.0451,0.0643]
+mstar['val_mean']=[0.2221,0.2614,0.2286]
+mstar['val_std']=[0.0657,0.0445,0.0635]
 
 class Evaluator:
     def __init__(self, device, args, log_file):
@@ -32,13 +38,45 @@ class Evaluator:
         self.logger.info("=> Runnning full evaluation with method: {}".format(self.args.method))
         load_checkpoint(model=model, model_path=self.args.ckpt_path, type=self.args.model_tag)
         #此处为新增的代码，用来提取mstar的特征
-        test_dataset=ImageFolder('./data/mstar/test')
-        test_mean,test_std=compute_mean_std(test_dataset)
-        test_loader=get_test_dataloader(test_mean, test_std)
-        extract_mstar_features(model, test_loader,self.args, self.device)
-        import sys
-        sys.exit()
         
+        train_dataset=ImageFolder('./data/mstar/train')
+        train_mean,train_std=mstar['train_mean'],mstar['train_std']
+        train_loader=get_training_dataloader(train_mean, train_std)
+        
+        train_mean, _ = extract_mean_features(model=model,  train_loader=train_loader, args=self.args,
+                                              logger=self.logger, device=self.device)
+        results = []
+        for shot in self.args.shots:
+            test_dataset=ImageFolder('./data/mstar/test')
+            test_mean,test_std=compute_mean_std(test_dataset)
+            sampler = CategoriesSampler(test_dataset.class_to_idx, self.args.batch_size,
+                                        self.args.n_ways, shot, self.args.n_query,
+                                        self.args.balanced, self.args.alpha_dirichlet)
+            test_loader=get_test_dataloader(test_mean, test_std,sampler=sampler,pin_memory=True)
+            task_generator = Tasks_Generator(n_ways=self.args.n_ways, shot=shot, loader=test_loader,
+                                             train_mean=train_mean, log_file=self.log_file)
+            results_task = []
+            for i in range(int(self.args.number_tasks/self.args.batch_size)):
+
+                method = self.get_method_builder(model=model)
+
+                tasks = task_generator.generate_tasks()
+
+                # Run task
+                logs = method.run_task(task_dic=tasks, shot=shot)
+
+                acc_mean, acc_conf = compute_confidence_interval(logs['acc'][:, -1])
+
+                results_task.append(acc_mean)
+                del method
+            results.append(results_task)
+
+        mean_accuracies = np.asarray(results).mean(1)
+        self.logger.info('----- Final test results -----')
+        for shot in self.args.shots:
+            self.logger.info('{}-shot mean test accuracy over {} tasks: {}'.format(shot, self.args.number_tasks,mean_accuracies[self.args.shots.index(shot)]))
+        
+        '''
         dataset = {}
         loader_info = {'aug': False, 'out_name': False}
 
@@ -85,8 +123,9 @@ class Evaluator:
         mean_accuracies = np.asarray(results).mean(1)
         self.logger.info('----- Final test results -----')
         for shot in self.args.shots:
-            self.logger.info('{}-shot mean test accuracy over {} tasks: {}'.format(shot, self.args.number_tasks,
-                                                                                   mean_accuracies[self.args.shots.index(shot)]))
+            self.logger.info('{}-shot mean test accuracy over {} tasks: {}'.format(shot, self.args.number_tasks,mean_accuracies[self.args.shots.index(shot)]))
+        
+        '''                                                                    
         return mean_accuracies
 
     def get_method_builder(self, model):

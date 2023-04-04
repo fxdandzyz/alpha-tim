@@ -226,7 +226,7 @@ class ResNet(nn.Module):
             x = self.classifier(x)
 
         if is_feat:
-            return [f0, f1, f2, f3, feat], x
+            return feat,x
         else:
             return x
 

@@ -401,7 +401,7 @@ def extract_mean_features(model, train_loader, args, logger, device):
         model.eval()
         with torch.no_grad():
             out_mean, fc_out_mean = [], []
-            for i, (inputs, labels, _) in enumerate(warp_tqdm(train_loader, False)):
+            for i, (inputs, labels) in enumerate(warp_tqdm(train_loader, False)):
                 inputs = inputs.to(device)
                 outputs, fc_outputs = model(inputs, True)
                 out_mean.append(outputs.cpu().data.numpy())
