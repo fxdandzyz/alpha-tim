@@ -146,6 +146,8 @@ def load_checkpoint(model, model_path, type='best'):
     else:
         assert False, 'type should be in [best, or last], but got {}'.format(type)
     state_dict = checkpoint['state_dict']
+    state_dict.pop('module.classifier.weight')
+    state_dict.pop('module.classifier.bias')
     names = []
     for k, v in state_dict.items():
         names.append(k)

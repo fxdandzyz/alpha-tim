@@ -52,10 +52,11 @@ EVAL:
     shots: [1,5]
     used_set: 'test'
     fresh_start: False
+    feature_path: './checkpoints/mstar/softmax/resnet12/output.plk'
 
 DISTRIBUTED:
     cuda: True
     visdom_port:
     seed: 2020
-    ckpt_path: 'checkpoints/mstar/softmax/resnet18' # path model checkpoint
+    ckpt_path: './checkpoints/mstar/softmax/resnet12' # path model checkpoint
     log_path: 'logs' # path to where log files will be saved 

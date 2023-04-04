@@ -8,7 +8,7 @@ import re
 import datetime
 
 import numpy
-
+import pickle
 import torch
 from torch.optim.lr_scheduler import _LRScheduler
 import torchvision
@@ -71,7 +71,7 @@ def get_network(args):
         net = xception()
     #新加实验用的resnet12
     elif args.arch == 'resnet12':
-        net = ResNet12.Resnet12(num_classes=args.num_classes)
+        net = ResNet12.Resnet12(num_classes=args.num_classes,use_classifier=False)
     elif args.arch == 'resnet18':
         from models.resnet import resnet18
         net = resnet18()
@@ -268,12 +268,12 @@ def get_test_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True):
     """
 
     transform_test = transforms.Compose([
-        transforms.Resize((448, 448)),
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ])
     #cifar100_test = CIFAR100Test(path, transform=transform_test)
-    mstar_test = torchvision.datasets.ImageFolder("./data_show/test", transform=transform_test)
+    mstar_test = torchvision.datasets.ImageFolder("./data/mstar/test", transform=transform_test)
     mstar_test_loader = DataLoader(
         mstar_test, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
 
@@ -301,7 +301,21 @@ def compute_mean_std(mstar_dataset):
     std = numpy.std(std_r)/255, numpy.std(std_g)/255, numpy.std(std_b)/255
 
     return mean, std
-
+def extract_mstar_features(model,dataloader,args,device):
+    model.eval()
+    data={0:[],1:[],2:[]}
+    with torch.no_grad():
+        for i,(inputs,target) in enumerate(dataloader):
+            inputs=inputs.to(device)
+            target=target.to('cpu')
+            output=model(inputs)
+            index=0
+            for j in target:
+                data[int(j)].append(output[index])
+                index+=1
+    with open(args.feature_path,'wb') as file:
+        pickle.dump(data,file)
+        
 class WarmUpLR(_LRScheduler):
     """warmup_training learning rate scheduler
     Args:

@@ -9,7 +9,8 @@ from src.methods.pt_map import PT_MAP
 from src.methods.protonet import ProtoNet
 from src.methods.entropy_min import Entropy_min
 from src.datasets import Tasks_Generator, CategoriesSampler, get_dataset, get_dataloader
-
+from torchvision.datasets import ImageFolder
+from src.utils_mstar import get_test_dataloader,compute_mean_std,extract_mstar_features
 
 class Evaluator:
     def __init__(self, device, args, log_file):
@@ -30,6 +31,14 @@ class Evaluator:
         """
         self.logger.info("=> Runnning full evaluation with method: {}".format(self.args.method))
         load_checkpoint(model=model, model_path=self.args.ckpt_path, type=self.args.model_tag)
+        #此处为新增的代码，用来提取mstar的特征
+        test_dataset=ImageFolder('./data/mstar/test')
+        test_mean,test_std=compute_mean_std(test_dataset)
+        test_loader=get_test_dataloader(test_mean, test_std)
+        extract_mstar_features(model, test_loader,self.args, self.device)
+        import sys
+        sys.exit()
+        
         dataset = {}
         loader_info = {'aug': False, 'out_name': False}
 

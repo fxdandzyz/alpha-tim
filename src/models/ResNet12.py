@@ -149,11 +149,12 @@ class BasicBlock(nn.Module):
 class ResNet(nn.Module):
 
     def __init__(self, block, n_blocks, keep_prob=1.0, avg_pool=False, drop_rate=0.0,
-                 dropblock_size=5, num_classes=-1, use_se=False):
+                 dropblock_size=5, num_classes=-1, use_se=False,use_classifier=False):
         super(ResNet, self).__init__()
 
         self.inplanes = 3
         self.use_se = use_se
+        self.use_classifier=use_classifier
         self.layer1 = self._make_layer(block, n_blocks[0], 64,
                                        stride=2, drop_rate=drop_rate)
         self.layer2 = self._make_layer(block, n_blocks[1], 160,
@@ -178,7 +179,7 @@ class ResNet(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
         self.num_classes = num_classes
-        if self.num_classes > 0:
+        if self.use_classifier==True:
             self.classifier = nn.Linear(640, self.num_classes)
 
     def _make_layer(self, block, n_block, planes, stride=1, drop_rate=0.0, drop_block=False, block_size=1):
@@ -221,7 +222,7 @@ class ResNet(nn.Module):
             x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         feat = x
-        if self.num_classes > 0:
+        if self.use_classifier==True:
             x = self.classifier(x)
 
         if is_feat:
