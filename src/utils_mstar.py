@@ -278,7 +278,7 @@ def get_test_dataloader(mean, std,batch_size=4, num_workers=2, shuffle=True,samp
         mstar_test_loader = DataLoader(
             mstar_test, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
     else:
-        mstar_test_loaer = DataLoader(
+        mstar_test_loader = DataLoader(
             mstar_test,batch_sampler=sampler,num_workers=num_workers,pin_memory=pin_memory)
     return mstar_test_loader
 

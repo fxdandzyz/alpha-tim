@@ -146,8 +146,6 @@ def load_checkpoint(model, model_path, type='best'):
     else:
         assert False, 'type should be in [best, or last], but got {}'.format(type)
     state_dict = checkpoint['state_dict']
-    state_dict.pop('module.classifier.weight')
-    state_dict.pop('module.classifier.bias')
     names = []
     for k, v in state_dict.items():
         names.append(k)
@@ -368,8 +366,8 @@ def extract_features(model, support, query):
         outputs_s = []
         outputs_q = []
         for i in range(len(support)):
-            output_s, _ = model(support[i], feature=True)
-            output_q, _ = model(query[i], feature=True)
+            output_s, _ = model(support[i], is_feat=True)
+            output_q, _ = model(query[i], is_feat=True)
             outputs_s.append(output_s)
             outputs_q.append(output_q)
         support = torch.stack(outputs_s)

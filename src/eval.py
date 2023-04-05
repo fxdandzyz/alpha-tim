@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from src.utils import warp_tqdm, compute_confidence_interval, load_checkpoint, Logger, extract_mean_features
 from src.methods.tim import ALPHA_TIM, TIM_GD
 from src.methods.laplacianshot import LaplacianShot
@@ -49,7 +50,8 @@ class Evaluator:
         for shot in self.args.shots:
             test_dataset=ImageFolder('./data/mstar/test')
             test_mean,test_std=compute_mean_std(test_dataset)
-            sampler = CategoriesSampler(test_dataset.class_to_idx, self.args.batch_size,
+            test_dataset_labels=torch.tensor([item[1] for item in test_dataset.imgs])
+            sampler = CategoriesSampler(test_dataset_labels, self.args.batch_size,
                                         self.args.n_ways, shot, self.args.n_query,
                                         self.args.balanced, self.args.alpha_dirichlet)
             test_loader=get_test_dataloader(test_mean, test_std,sampler=sampler,pin_memory=True)

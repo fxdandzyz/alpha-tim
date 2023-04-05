@@ -47,7 +47,7 @@ class Tasks_Generator:
                             train_mean: torch.tensor of shape [feature_dim]}
         """
         tasks_dics = []
-        for i, (data, labels, _) in enumerate(warp_tqdm(self.loader, False)):
+        for i, (data, labels) in enumerate(warp_tqdm(self.loader, False)):
             task = self.get_task(data, labels)
             tasks_dics.append(task)
 
@@ -59,7 +59,7 @@ class Tasks_Generator:
             if key == 'x_s' or key == 'x_q':
                 merged_tasks[key] = torch.cat([tasks_dics[i][key] for i in range(n_tasks)], dim=0).view(n_tasks,
                                                                                                         n_samples, 3,
-                                                                                                        84, 84)
+                                                                                                        224, 224)
             else:
                 merged_tasks[key] = torch.cat([tasks_dics[i][key] for i in range(n_tasks)], dim=0).view(n_tasks,
                                                                                                         n_samples, -1)
