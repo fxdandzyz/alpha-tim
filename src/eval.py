@@ -13,11 +13,6 @@ from src.datasets import Tasks_Generator, CategoriesSampler, get_dataset, get_da
 from torchvision.datasets import ImageFolder
 from src.utils_mstar import get_test_dataloader,get_training_dataloader,compute_mean_std,extract_mstar_features
 
-mstar={}
-mstar['train_mean']=[0.2312,0.2689,0.2351]
-mstar['train_std']=[0.0669,0.0451,0.0643]
-mstar['val_mean']=[0.2221,0.2614,0.2286]
-mstar['val_std']=[0.0657,0.0445,0.0635]
 
 class Evaluator:
     def __init__(self, device, args, log_file):
@@ -41,7 +36,7 @@ class Evaluator:
         #此处为新增的代码，用来提取mstar的特征
         
         train_dataset=ImageFolder('./data/mstar/train')
-        train_mean,train_std=mstar['train_mean'],mstar['train_std']
+        train_mean,train_std=compute_mean_std(train_dataset)
         train_loader=get_training_dataloader(train_mean, train_std)
         
         train_mean, _ = extract_mean_features(model=model,  train_loader=train_loader, args=self.args,

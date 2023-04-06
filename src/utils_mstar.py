@@ -292,13 +292,13 @@ def compute_mean_std(mstar_dataset):
         a tuple contains mean, std value of entire dataset
     """
 
-    data_r = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[0].mean() for i in range(len(mstar_dataset))])
-    data_g = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[1].mean() for i in range(len(mstar_dataset))])
-    data_b = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[2].mean() for i in range(len(mstar_dataset))])
+    data_r = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()])[:,:,0].mean() for i in range(len(mstar_dataset))])
+    data_g = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()])[:,:,1].mean() for i in range(len(mstar_dataset))])
+    data_b = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()])[:,:,2].mean() for i in range(len(mstar_dataset))])
     
-    std_r = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[0].std() for i in range(len(mstar_dataset))])
-    std_g = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[1].std() for i in range(len(mstar_dataset))])
-    std_b = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()]).reshape(3,-1)[2].std() for i in range(len(mstar_dataset))])
+    std_r = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()])[:,:,0].std() for i in range(len(mstar_dataset))])
+    std_g = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()])[:,:,1].std() for i in range(len(mstar_dataset))])
+    std_b = numpy.dstack([torch.Tensor([mstar_dataset[i][0].getdata()])[:,:,2].std() for i in range(len(mstar_dataset))])
     
     mean = numpy.mean(data_r)/255, numpy.mean(data_g)/255, numpy.mean(data_b)/255
     std = numpy.std(std_r)/255, numpy.std(std_g)/255, numpy.std(std_b)/255

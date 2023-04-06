@@ -1,0 +1,5 @@
+[__main__]: [INFO]: => Creating model 'resnet12'
+[__main__]: [INFO]: Number of model parameters: 12428807
+[__main__]: [INFO]: Meta Val 0: 0.3376958668231964
+[__main__]: [INFO]: Meta Val 1: 0.1527777761220932
+[__main__]: [INFO]: Meta Val 2: 0.3665420114994049

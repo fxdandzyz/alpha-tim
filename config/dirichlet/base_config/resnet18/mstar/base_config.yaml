@@ -40,7 +40,7 @@ DATA:
     target_split_dir:
 
 EVAL:
-    evaluate: True   # Set to True to evaluate methods
+    evaluate: False   # Set to True to evaluate methods
     number_tasks: 1000 # Number of tasks to evaluate
     batch_size: 32
     n_ways: 3

@@ -2,22 +2,21 @@ import torch
 import time
 import torch.nn as nn
 import numpy as np
+import torchvision
 from src.utils import warp_tqdm, get_metric, AverageMeter
 from src.datasets import CategoriesSampler, get_dataset, get_dataloader
 from src.utils_mstar import get_training_dataloader,get_val_dataloader,get_test_dataloader,compute_mean_std,get_network
-mstar={}
-mstar['train_mean']=[0.2312,0.2689,0.2351]
-mstar['train_std']=[0.0669,0.0451,0.0643]
-mstar['val_mean']=[0.2221,0.2614,0.2286]
-mstar['val_std']=[0.0657,0.0445,0.0635]
+
 class Trainer:
     def __init__(self, device, args):
         self.device=device
         self.args=args
-        self.train_mean,self.train_std=mstar['train_mean'],mstar['train_std']
+        self.train_dataset=torchvision.datasets.ImageFolder('./data/mstar/train')
+        self.train_mean,self.train_std=compute_mean_std(self.train_dataset)
         self.train_loader=get_training_dataloader(mean=self.train_mean,std=self.train_std,batch_size=args.batch_size,
                                                   num_workers=args.num_workers,shuffle=True)
-        self.val_mean,self.val_std=mstar['val_mean'],mstar['val_std']
+        self.val_dataset=torchvision.datasets.ImageFolder('./data/mstar/val')
+        self.val_mean,self.val_std=compute_mean_std(self.val_dataset)
         self.val_loader=get_val_dataloader(mean=self.val_mean,std=self.val_std,batch_size=args.batch_size,
                                                   num_workers=args.num_workers,shuffle=True)
         self.num_classes=args.num_classes
