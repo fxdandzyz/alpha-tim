@@ -65,7 +65,7 @@ class TIM(object):
         updates :
             self.weights : torch.Tensor of shape [n_task, num_class, feature_dim]
         """
-        self.model.eval()
+        #self.model.eval()
         t0 = time.time()
         n_tasks = support.size(0)
         one_hot = get_one_hot(y_s)
@@ -77,7 +77,7 @@ class TIM(object):
                          query=query,
                          y_s=y_s,
                          y_q=y_q)
-        self.model.train()
+        #self.model.train()
 
         logits_q = self.get_logits(query).detach()
         q_probs = logits_q.softmax(2)
@@ -205,7 +205,7 @@ class TIM_GD(TIM):
         self.weights.requires_grad_()
         optimizer = torch.optim.Adam([self.weights], lr=self.lr)
         y_s_one_hot = get_one_hot(y_s)
-        self.model.train()
+        #self.model.train()
         for i in tqdm(range(self.iter)):
             logits_s = self.get_logits(support)
             logits_q = self.get_logits(query)
@@ -221,14 +221,14 @@ class TIM_GD(TIM):
             optimizer.step()
 
             t1 = time.time()
-            self.model.eval()
+           # self.model.eval()
 
             self.record_info(new_time=t1-t0,
                              support=support,
                              query=query,
                              y_s=y_s,
                              y_q=y_q)
-            self.model.train()
+            #self.model.train()
             t0 = time.time()
 
 class ALPHA_TIM(TIM):
@@ -278,7 +278,7 @@ class ALPHA_TIM(TIM):
         self.weights.requires_grad_()
         optimizer = torch.optim.Adam([self.weights], lr=self.lr)
         y_s_one_hot = get_one_hot(y_s)
-        self.model.train()
+        #self.model.train()
 
         for i in tqdm(range(self.iter)):
             logits_s = self.get_logits(support)
@@ -319,12 +319,12 @@ class ALPHA_TIM(TIM):
             optimizer.step()
 
             t1 = time.time()
-            self.model.eval()
+            #self.model.eval()
 
             self.record_info(new_time=t1-t0,
                              support=support,
                              query=query,
                              y_s=y_s,
                              y_q=y_q)
-            self.model.train()
+            #self.model.train()
             t0 = time.time()

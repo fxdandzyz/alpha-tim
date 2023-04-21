@@ -32,7 +32,7 @@ class Evaluator:
             results : List of the mean accuracy for each number of support shots
         """
         self.logger.info("=> Runnning full evaluation with method: {}".format(self.args.method))
-        load_checkpoint(model=model, model_path=self.args.ckpt_path, type=self.args.model_tag)
+        #load_checkpoint(model=model, model_path=self.args.ckpt_path, type=self.args.model_tag)
         #此处为新增的代码，用来提取mstar的特征
         
         #train_dataset=ImageFolder('./data/mstar/train')
@@ -52,7 +52,9 @@ class Evaluator:
             #                            self.args.balanced, self.args.alpha_dirichlet)
             #test_loader=get_test_dataloader(test_mean, test_std,sampler=sampler,pin_memory=True)
             #task_generator = Tasks_Generator(n_ways=self.args.n_ways, shot=shot, loader=test_loader,
-            #                                 train_mean=train_mean, log_file=self.log_file)
+            #train_mean=train_mean, log_file=self.log_file)
+            #用backbone代码
+            '''
             from src import FSLTask
             cfg = {'shot': shot, 'ways': self.args.n_ways, 'queries': self.args.n_query, 'tasks': self.args.number_tasks, 'sample': self.args.balanced}
             FSLTask.loadDataSet("mstar")
@@ -61,15 +63,24 @@ class Evaluator:
             saved_features=dict()
             saved_features['ndatas']=torch.zeros(self.args.number_tasks,self.args.n_ways*(shot+self.args.n_query),640)
             saved_features['labels']=torch.zeros(self.args.number_tasks,self.args.n_ways*(shot+self.args.n_query))
-            feature_path='./checkpoint/mstar/softmax/resnet12/saved_features_{}.plk'.format(shot)
+            '''
+            #用backbone的代码
+            feature_path='./checkpoints/mstar/softmax/resnet12/saved_features_{}.plk'.format(shot)
+            #不用backbone的代码
+            results_task = []
+            with open(feature_path,'rb') as f:
+                saved_feature=pickle.load(f)
+            #不用backbone的代码
             for i in range(int(self.args.number_tasks/self.args.batch_size)):
 
                 method = self.get_method_builder(model=model)
                 #tasks = task_generator.generate_tasks()
+                #用backbone的代码
+                '''
                 ndatas=torch.zeros(self.args.batch_size,self.args.n_ways*(shot+self.args.n_query),3,224,224)
                 labels=torch.zeros(self.args.batch_size,self.args.n_ways*(shot+self.args.n_query))
                 for j in range(self.args.batch_size):
-                    ndatas[j],labels[j],_=FSLTask.GenerateRun(iRun=i*self.args.batch_size+j, cfg=cfg)   
+                   ndatas[j],labels[j],_=FSLTask.GenerateRun(iRun=i*self.args.batch_size+j, cfg=cfg)   
                 support=ndatas[:,:shot*self.args.n_ways]
                 query=ndatas[:,shot*self.args.n_ways:]
                 tasks=dict()
@@ -79,15 +90,27 @@ class Evaluator:
                 saved_features['ndatas'][i*self.args.batch_size:(i+1)*self.args.batch_size,:shot*self.args.n_ways]=tasks['x_s']
                 saved_features['ndatas'][i*self.args.batch_size:(i+1)*self.args.batch_size,shot*self.args.n_ways:]=tasks['x_q']
                 saved_features['labels'][i*self.args.batch_size:(i+1)*self.args.batch_size]=labels.long()
+                '''
                 # Run task
+                # 用backbone的代码
+                
+                #不用backbone的代码
+                
+                tasks=dict()
+                tasks['y_s']=saved_feature['labels'][i*self.args.batch_size:(i+1)*self.args.batch_size,:shot*self.args.n_ways].long()
+                tasks['y_q']=saved_feature['labels'][i*self.args.batch_size:(i+1)*self.args.batch_size,shot*self.args.n_ways:].long()
+                tasks['x_s']=saved_feature['ndatas'][i*self.args.batch_size:(i+1)*self.args.batch_size,:shot*self.args.n_ways]
+                tasks['x_q']=saved_feature['ndatas'][i*self.args.batch_size:(i+1)*self.args.batch_size,shot*self.args.n_ways:]
+                
+                #不用backbone的代码
                 logs = method.run_task(task_dic=tasks, shot=shot)
 
                 acc_mean, acc_conf = compute_confidence_interval(logs['acc'][:, -1])
 
                 results_task.append(acc_mean)
                 del method
-            with open(feature_path,'wb')as f:  
-                pickle.dump(saved_features,f)
+            #with open(feature_path,'wb')as f:  
+            #    pickle.dump(saved_features,f)
             results.append(results_task)
 
         mean_accuracies = np.asarray(results).mean(1)

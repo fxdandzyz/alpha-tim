@@ -86,7 +86,7 @@ def main():
 
     if args.evaluate:
         evaluator = Evaluator(device=device, args=args, log_file=log_file)
-        results = evaluator.run_full_evaluation(model=model)
+        results = evaluator.run_full_evaluation(model=None)
         return results
 
     # If this line is reached, then training the model
