@@ -69,7 +69,7 @@ def _load_pickle(file):
     imgfolder=torchvision.datasets.ImageFolder(root=file)
     mean,std=compute_mean_std(imgfolder)
     transform_test = transforms.Compose([
-        transforms.Resize((448, 448)),
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ])
@@ -77,7 +77,7 @@ def _load_pickle(file):
     dataset=dict()
     labels=np.array([item[1] for item in imgfolder])
     dataset['labels']=torch.LongTensor(labels)
-    data=[item[0].getdata() for item in imgfolder]
+    data=[item[0] for item in imgfolder]
     dataset['data']=torch.FloatTensor(np.stack(data,axis=0))
     return dataset
     '''

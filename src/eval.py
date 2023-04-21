@@ -57,32 +57,28 @@ class Evaluator:
             cfg = {'shot': shot, 'ways': self.args.n_ways, 'queries': self.args.n_query, 'tasks': self.args.number_tasks, 'sample': self.args.balanced}
             FSLTask.loadDataSet("mstar")
             FSLTask.setRandomStates(cfg)
-            ndatas, labels, query_samples = FSLTask.GenerateRunSet(cfg=cfg)
-            if cfg['sample'] == 'uniform':
-                ndatas = ndatas.permute(0, 2, 1, 3).reshape(n_runs, n_samples, -1)
-                labels = torch.arange(n_ways).view(1, 1, n_ways).expand(n_runs, n_shot + n_queries, 5).clone().view(n_runs,                                                                                            n_samples)
-            elif cfg['sample'] == 'dirichlet':
-                # ndatas = ndatas.permute(0, 2, 1, 3).reshape(n_runs, n_samples, -1)
-                # labels = torch.arange(n_ways).view(1, 1, n_ways).expand(n_runs, n_shot + n_queries, 5).clone().view(n_runs,n_samples)
-                pass
             results_task = []
             saved_features=dict()
             saved_features['ndatas']=torch.zeros(self.args.number_tasks,self.args.n_ways*(shot+self.args.n_query),640)
-            saved_features['labels']=labels
+            saved_features['labels']=torch.zeros(self.args.number_tasks,self.args.n_ways*(shot+self.args.n_query))
             feature_path='./checkpoint/mstar/softmax/resnet12/saved_features_{}.plk'.format(shot)
             for i in range(int(self.args.number_tasks/self.args.batch_size)):
 
                 method = self.get_method_builder(model=model)
-
                 #tasks = task_generator.generate_tasks()
-                support=ndatas[i*self.args.batch_size:(i+1)*self.args.batch_size,:shot*self.n_ways]
-                query=ndatas[i*self.args.batch_size:(i+1)*self.args.batch_size,shot*self.n_ways:]
+                ndatas=torch.zeros(self.args.batch_size,self.args.n_ways*(shot+self.args.n_query),3,224,224)
+                labels=torch.zeros(self.args.batch_size,self.args.n_ways*(shot+self.args.n_query))
+                for j in range(self.args.batch_size):
+                    ndatas[j],labels[j],_=FSLTask.GenerateRun(iRun=i*self.args.batch_size+j, cfg=cfg)   
+                support=ndatas[:,:shot*self.args.n_ways]
+                query=ndatas[:,shot*self.args.n_ways:]
                 tasks=dict()
-                tasks['y_s']=labels[i*self.args.batch_size:(i+1)*self.args.batch_size,:shot*self.n_ways]
-                tasks['y_q']=labels[i*self.args.batch_size:(i+1)*self.args.batch_size,shot*self.n_ways:]
+                tasks['y_s']=labels[:,:shot*self.args.n_ways].long()
+                tasks['y_q']=labels[:,shot*self.args.n_ways:].long()
                 tasks['x_s'],tasks['x_q']=extract_features(model=model, support=support, query=query)
-                saved_features['ndatas'][i*self.args.batch_size:(i+1)*self.args.batch_size,:shot*self.n_ways]=tasks['x_s']
-                saved_features['nadats'][i*self.args.batch_size:(i+1)*self.args.batch_size,shot*self.n_ways:]=tasks['x_q']
+                saved_features['ndatas'][i*self.args.batch_size:(i+1)*self.args.batch_size,:shot*self.args.n_ways]=tasks['x_s']
+                saved_features['ndatas'][i*self.args.batch_size:(i+1)*self.args.batch_size,shot*self.args.n_ways:]=tasks['x_q']
+                saved_features['labels'][i*self.args.batch_size:(i+1)*self.args.batch_size]=labels.long()
                 # Run task
                 logs = method.run_task(task_dic=tasks, shot=shot)
 

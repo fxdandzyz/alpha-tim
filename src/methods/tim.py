@@ -146,6 +146,8 @@ class TIM(object):
         # Transfer tensors to GPU if needed
         support = x_s.to(self.device)  # [ N * (K_s + K_q), d]
         query = x_q.to(self.device)  # [ N * (K_s + K_q), d]
+        y_s=y_s.to(self.device)
+        y_q=y_q.to(self.device)
         #y_s = y_s.long().squeeze(2).to(self.device)
         #y_q = y_q.long().squeeze(2).to(self.device)
 
